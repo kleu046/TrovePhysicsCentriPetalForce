@@ -228,4 +228,8 @@ with ui.nav_panel('Banked corners'):
             def notesC():
                 return "Lets move the slider to increase angle to 10 degrees.  Now centripetal force as a result of friction has a lesser effect, but the horizontal component of the normal force comes into play."
 
+            @render.text
+            def notesC():
+                return "In general, direct contribution to centripetal force is much greater by the normal force is much greater than friction.  Now centripetal force is the sum of the horizontal components of friction AND the normal force, which is greater than when the road is not banked.  Since centripetal force is proportional to the speed on a circular path, a vehicle can travel safely around a banked corner at higher speed without going off the road!"
+
 ui.nav_spacer()
