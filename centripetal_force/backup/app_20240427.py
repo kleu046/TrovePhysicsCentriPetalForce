@@ -16,7 +16,7 @@ with ui.nav_panel("What is centripetal force?"):
         with ui.sidebar(bg='#29e004'):
             ui.input_slider("time", "Animate", min=time_min, max=time_max,value=time_min, step=time_step, animate=True,)
 
-        with ui.card(height = 700):
+        with ui.card(height = 500):
             def calc_pos(r: float, w: float, t: float) -> (float, float):
                 return r * np.cos(w * t), r* np.sin(w * t)
 
@@ -102,26 +102,17 @@ with ui.nav_panel("What is centripetal force?"):
 
                 # demonsrate how centripetal acceleration points to the centre of the circel
                 if t == 0:
-                    xi, yi = calc_pos(path_radius, obj_omega, 4)
-                    v_xi, v_yi = calc_velocity_vector(path_radius, obj_omega, 4)
-                    xm, ym = calc_pos(path_radius, obj_omega, 2)
-                    v_xm, v_ym = calc_velocity_vector(path_radius, obj_omega, 2)
-
+                    xi, yi = calc_pos(path_radius, obj_omega, 1)
+                    v_xi, v_yi = calc_velocity_vector(path_radius, obj_omega, 1)
                     # v(t)
-                    ax.arrow(xi , yi, dx=v_xi, dy=v_yi, shape='full', color='lightblue', lw=2, head_width=plot_width/40)
-                    ax.arrow(xm , ym, dx=v_xm, dy=v_ym, shape='full', color='lightblue', lw=2, head_width=plot_width/40)
-                    ax.arrow(xi , yi , dx = 0 - xi, dy = 0 - yi, color='lightgrey', ls='--')
+                    ax.arrow(xi , yi, dx=v_xi, dy=v_yi, shape='full', color=lightgrey[counter], ls='--', lw=1, head_width=plot_width/40)
                     # v(0)
-                    ax.arrow(xm , ym , dx = (v_xi - v_x), dy = (v_yi - v_y), color='grey', head_width=plot_width/20)
-                    ax.arrow(xm , ym, dx=v_xi, dy=v_yi, shape='full', color='lightgrey', ls='--', lw=1, head_width=plot_width/40)
-                    ax.arrow(xm + v_xi , ym + v_yi, dx=-v_x, dy=-v_y, shape='full', color='lightgrey', ls='--', lw=1, head_width=plot_width/40)
+                    ax.arrow(xi + v_xi , yi + v_yi, dx=-v_x, dy=-v_y, shape='full', color=lightgrey[counter], ls='--', lw=1, head_width=plot_width/40)
 
-                    ax.text((xi + v_xi) * 1.4, (yi + v_yi), 'v(t=2)', fontdict={'size':12,'fontweight':'bold'})
-                    ax.text((xm + v_xm) * 1.4, (ym + v_ym), 'v(t=1)', fontdict={'size':12,'fontweight':'bold'})
-                    ax.text((xm + v_xi) * 2, (ym + v_yi), 'v(t=2) - v(t=0)', va='center', fontdict={'size':8})
+                    ax.text((xi + v_xi) * 1.2, (yi + v_yi) * 0.8, 'v(t>0)', fontdict={'size':12,'fontweight':'bold'})
+                    ax.text((xi + v_xi) * 0.9, (yi + v_yi) * 0.8, '- v(t=0)', ha='right', fontdict={'size':12,'fontweight':'bold'})
 
-                    #ax.arrow(xm , ym , dx = 0 - xm, dy = 0 - ym, color='lightgrey', ls='--')
-                    
+                    ax.arrow(xi, yi, dx = 0 - xi * 0.5, dy = 0 - yi * 0.5, color='grey', head_width = plot_width / 20)
                     
                 ax.arrow(centre_x, centre_y, dx=v_x, dy=v_y, shape='full', lw=2, head_width=plot_width/50)
 
@@ -177,20 +168,19 @@ with ui.nav_panel('Banked corners'):
     def rad(angle: float) -> float:
         return angle / 180 * np.pi
 
-    with ui.layout_sidebar():
-        
-        plot_width: float = 100.0
-        plot_height: float = 100.0
-        angle: float = 0
-        mu: float = 0.5
-        slope_x: np.array([float,float]) = np.array([0,100])
-        edge_color = 'black'
-        box_color = 'lightgrey'
-        box_height = 36
-        box_width = 15
-        anchor_x: float = (plot_width - box_width) / 2
-
+    with ui.layout_sidebar():        
         with ui.sidebar(bg='#29e004'):
+
+            plot_width: float = 100.0
+            plot_height: float = 100.0
+            angle: float = 0
+            mu: float = 0.5
+            slope_x: np.array([float,float]) = np.array([0,100])
+            edge_color = 'black'
+            box_color = 'lightgrey'
+            box_height = 36
+            box_width = 15
+            anchor_x: float = (plot_width - box_width) / 2
 
             ui.input_slider("angle_slider", "Angle", min=0, max=60, value=angle, step=1)
             ui.input_slider("mu_slider", "Coefficient of friction", min=0, max=1, value=mu, step=0.01)
@@ -198,52 +188,52 @@ with ui.nav_panel('Banked corners'):
         def create_rectangle(anchor_x: float, _anchor_y: float, width: float, height: float, angle: float, facecolor = face_color, edgecolor = edge_color) -> matplotlib.patches.Rectangle:
             return Rectangle((anchor_x, _anchor_y), width, height, angle=angle, lw=5, facecolor = facecolor, edgecolor = edgecolor) #use rotation_point parameter default = 'xy' = bottom left corner (x, y) available in later matplotlive versions?
 
-        with ui.card(height=700):        
-            @render.plot
-            @reactive.event(input.angle_slider, input.mu_slider)
-            def plot2() -> None:
-                angle: float = float(input.angle_slider())
-                mu: float = float(input.mu_slider())
-                
-                fig, ax = plt.subplots(figsize=(10,12))
-                print(int(input.angle_slider()))
-                ax.plot(slope_x, calc_y(slope_x, angle), lw=5, c='darkgrey', zorder=0)
+        
+        @render.plot
+        @reactive.event(input.angle_slider, input.mu_slider)
+        def plot2() -> None:
+            angle: float = float(input.angle_slider())
+            mu: float = float(input.mu_slider())
+            
+            fig, ax = plt.subplots(figsize=(10,12))
+            print(int(input.angle_slider()))
+            ax.plot(slope_x, calc_y(slope_x, angle), lw=5, c='darkgrey', zorder=0)
 
-                x: float = anchor_x
-                y: float = calc_y(x, angle)
+            x: float = anchor_x
+            y: float = calc_y(x, angle)
 
-                rect = create_rectangle(x, calc_y(anchor_x, angle), box_width, box_height, angle=angle, facecolor = box_color, edgecolor = edge_color) # angle in degrees
-                rect_bottom_centre_x = rect.get_x() + box_width/2 * np.cos(rad(angle))
-                rect_bottom_centre_y = calc_y(rect_bottom_centre_x, angle)
+            rect = create_rectangle(x, calc_y(anchor_x, angle), box_width, box_height, angle=angle, facecolor = box_color, edgecolor = edge_color) # angle in degrees
+            rect_bottom_centre_x = rect.get_x() + box_width/2 * np.cos(rad(angle))
+            rect_bottom_centre_y = calc_y(rect_bottom_centre_x, angle)
 
-                ax.add_patch(rect)
+            ax.add_patch(rect)
 
-                dy_std = 30
+            dy_std = 30
 
-                # weight
-                ax.arrow(rect_bottom_centre_x, rect_bottom_centre_y, dx=0, dy=-dy_std, shape='full', lw=2, head_width=plot_width/50, color='grey')
-                ax.text(rect_bottom_centre_x + 2, rect_bottom_centre_y - 0.5 * dy_std, 'Weight', fontdict={'size':12})
+            # weight
+            ax.arrow(rect_bottom_centre_x, rect_bottom_centre_y, dx=0, dy=-dy_std, shape='full', lw=2, head_width=plot_width/50, color='grey')
+            ax.text(rect_bottom_centre_x + 2, rect_bottom_centre_y - 0.5 * dy_std, 'Weight', fontdict={'size':12})
 
-                # normal
-                ax.arrow(rect_bottom_centre_x, rect_bottom_centre_y, dx=-dy_std*np.sin(rad(angle))*np.cos(rad(angle)), dy=dy_std*np.cos(rad(angle))*np.cos(rad(angle)), shape='full', lw=2, head_width=plot_width/50, color='grey')
-                ax.text(rect_bottom_centre_x - dy_std*np.sin(rad(angle)) - 8, rect_bottom_centre_y + dy_std*np.cos(rad(angle)) + 8, 'Normal', fontdict={'size':12})
+            # normal
+            ax.arrow(rect_bottom_centre_x, rect_bottom_centre_y, dx=-dy_std*np.sin(rad(angle))*np.cos(rad(angle)), dy=dy_std*np.cos(rad(angle))*np.cos(rad(angle)), shape='full', lw=2, head_width=plot_width/50, color='grey')
+            ax.text(rect_bottom_centre_x - dy_std*np.sin(rad(angle)) - 8, rect_bottom_centre_y + dy_std*np.cos(rad(angle)) + 8, 'Normal', fontdict={'size':12})
 
-                # friction
-                ax.arrow(rect_bottom_centre_x, rect_bottom_centre_y, dx=-mu*dy_std * np.cos(rad(angle))*np.cos(rad(angle)), dy=-mu*dy_std * np.sin(rad(angle))*np.cos(rad(angle)), shape='full', lw=2, head_width=plot_width/50, color='grey')
-                ax.text(rect_bottom_centre_x - mu*dy_std * np.cos(rad(angle)) - 10, rect_bottom_centre_y - mu*dy_std * np.sin(rad(angle)) - 10, 'friction', ha='left', fontdict={'size':12})        
+            # friction
+            ax.arrow(rect_bottom_centre_x, rect_bottom_centre_y, dx=-mu*dy_std * np.cos(rad(angle))*np.cos(rad(angle)), dy=-mu*dy_std * np.sin(rad(angle))*np.cos(rad(angle)), shape='full', lw=2, head_width=plot_width/50, color='grey')
+            ax.text(rect_bottom_centre_x - mu*dy_std * np.cos(rad(angle)) - 10, rect_bottom_centre_y - mu*dy_std * np.sin(rad(angle)) - 10, 'friction', ha='left', fontdict={'size':12})        
 
-                # horizontal ocmponents
-                if angle > 0:
-                    ax.arrow(rect_bottom_centre_x, rect_bottom_centre_y, dx=-dy_std*np.sin(rad(angle)), dy=0, shape='full', lw=2, head_width=plot_width/50, color='blue')
-                    ax.arrow(rect_bottom_centre_x, rect_bottom_centre_y, dx=-mu*dy_std * np.cos(rad(angle)), dy=0, shape='full', lw=2, head_width=plot_width/50, color='red')
+            # horizontal ocmponents
+            if angle > 0:
+                ax.arrow(rect_bottom_centre_x, rect_bottom_centre_y, dx=-dy_std*np.sin(rad(angle)), dy=0, shape='full', lw=2, head_width=plot_width/50, color='blue')
+                ax.arrow(rect_bottom_centre_x, rect_bottom_centre_y, dx=-mu*dy_std * np.cos(rad(angle)), dy=0, shape='full', lw=2, head_width=plot_width/50, color='red')
 
 
-                ax.set_xlim(0,plot_width)
-                ax.set_ylim(-40,plot_height)
-                ax.set_aspect('equal')
-                ax.axis('off')
+            ax.set_xlim(0,plot_width)
+            ax.set_ylim(-40,plot_height)
+            ax.set_aspect('equal')
+            ax.axis('off')
 
-                return fig
+            return fig
 
         with ui.card():
             @render.text
@@ -260,6 +250,6 @@ with ui.nav_panel('Banked corners'):
 
             @render.text
             def notesD():
-                return "Now centripetal force is the sum of the horizontal components of friction AND the normal force, which is greater than having just friction when the road is not banked.  Since centripetal force is proportional to the speed on a circular path, a vehicle can travel safely around a banked corner at higher speed without going off the road!"
+                return "In general, direct contribution to centripetal force is much greater by the normal force is much greater than friction.  Now centripetal force is the sum of the horizontal components of friction AND the normal force, which is greater than when the road is not banked.  Since centripetal force is proportional to the speed on a circular path, a vehicle can travel safely around a banked corner at higher speed without going off the road!"
 
 ui.nav_spacer()
