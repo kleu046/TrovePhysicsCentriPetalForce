@@ -12,10 +12,11 @@ time_step: float = 1.5
 ui.page_opts(title="Centripetal force", fillable=True)
 
 with ui.nav_panel("What is centripetal force?"):
-        with ui.layout_sidebar():
-            with ui.sidebar(bg='#29e004'):
-                ui.input_slider("time", "Animate", min=time_min, max=time_max,value=time_min, step=time_step, animate=True,)
-                
+    with ui.layout_sidebar():
+        with ui.sidebar(bg='#29e004'):
+            ui.input_slider("time", "Animate", min=time_min, max=time_max,value=time_min, step=time_step, animate=True,)
+
+        with ui.card(height = 500):
             def calc_pos(r: float, w: float, t: float) -> (float, float):
                 return r * np.cos(w * t), r* np.sin(w * t)
 
@@ -75,70 +76,67 @@ with ui.nav_panel("What is centripetal force?"):
                 t: float = float(input.time())
                 v_x, v_y = calc_velocity_vector(path_radius, obj_omega, t)
 
-            with ui.card(height = 500):
-                @render.plot
-                @reactive.event(input.time)
-                def plot() -> None:
-                    # draw a small circle with a circular path
-                    fig, ax = plt.subplots(figsize=fig_size)
-                    ax.plot(path_x, path_y, lw=10, color='#f0ff0f', zorder=0)
+            @render.plot
+            @reactive.event(input.time)
+            def plot() -> None:
+                # draw a small circle with a circular path
+                fig, ax = plt.subplots(figsize=fig_size)
+                ax.plot(path_x, path_y, lw=10, color='#f0ff0f', zorder=0)
 
-                    counter = 0
-                    n = input.time() - time_step
-                    while n > 0 and counter < len(lightgrey):
-                        grey_centre = calc_pos(path_radius, obj_omega, n)
-                        grey_circle = create_circle(grey_centre, obj_radius, facecolor = face_color, edgecolor =lightgrey[counter])
-                        ax.add_patch(grey_circle)
-                        
-                        grey_velocity = calc_velocity_vector(path_radius, obj_omega, n)
-                        ax.arrow(grey_centre[0] , grey_centre[1], dx=grey_velocity[0], dy=grey_velocity[1], shape='full', color=lightgrey[counter], lw=2, head_width=plot_width/50)
-                        n -= time_step
-                        counter += 1
-
-                    circle = create_circle((centre_x, centre_y), obj_radius, facecolor = face_color, edgecolor = edge_color)
-                    ax.add_patch(circle)
-                    ax.arrow(centre_x, centre_y, dx=v_x, dy=v_y, shape='full', lw=2, head_width=plot_width/50)
-                    ax.text((centre_x + v_x) / 0.9, (centre_y + v_y)/0.9, 'v', fontdict={'size':12,'fontweight':'bold'})
-                    ax.arrow(centre_x, centre_y, dx=0-centre_x, dy=0-centre_y, shape='full', lw=3, head_width=plot_width/30)
-                    ax.text((centre_x + v_x/2)* 0.5, (centre_y + v_y/2) * 0.5, 'a', fontdict={'size':12,'fontweight':'bold'})
-
-                    #ax.text(rect_bottom_centre_x + 2, rect_bottom_centre_y - 0.5 * dy_std, f'{str(round(w, 1))} N', fontdict={'size':12})
-
-                    time_label = f't={input.time()}'
-                    ax.text(80,90, time_label, ha='left', fontdict={'size':12,'fontweight':'bold'})
-
-                    ax.set_xlim(-plot_width,plot_width)
-                    ax.set_ylim(-plot_height,plot_height)
-                    ax.set_aspect('equal')
+                counter = 0
+                n = input.time() - time_step
+                while n > 0 and counter < len(lightgrey):
+                    grey_centre = calc_pos(path_radius, obj_omega, n)
+                    grey_circle = create_circle(grey_centre, obj_radius, facecolor = face_color, edgecolor =lightgrey[counter])
+                    ax.add_patch(grey_circle)
                     
-                    ax.axis('off')
+                    grey_velocity = calc_velocity_vector(path_radius, obj_omega, n)
+                    ax.arrow(grey_centre[0] , grey_centre[1], dx=grey_velocity[0], dy=grey_velocity[1], shape='full', color=lightgrey[counter], lw=2, head_width=plot_width/50)
+                    n -= time_step
+                    counter += 1
 
-                    return fig
+                circle = create_circle((centre_x, centre_y), obj_radius, facecolor = face_color, edgecolor = edge_color)
+                ax.add_patch(circle)
+                ax.arrow(centre_x, centre_y, dx=v_x, dy=v_y, shape='full', lw=2, head_width=plot_width/50)
+                ax.text((centre_x + v_x) / 0.9, (centre_y + v_y)/0.9, 'v', fontdict={'size':12,'fontweight':'bold'})
+                ax.arrow(centre_x, centre_y, dx=0-centre_x, dy=0-centre_y, shape='full', lw=3, head_width=plot_width/30)
+                ax.text((centre_x + v_x/2)* 0.5, (centre_y + v_y/2) * 0.5, 'a', fontdict={'size':12,'fontweight':'bold'})
 
-            with ui.card():
-                @render.text
-                def notes1():
-                    return "Centripetal force is not a fundamental force.  It is an apparent force as a result of an object in motion following a circular path."
+                time_label = f't={input.time()}'
+                ax.text(80,90, time_label, ha='left', fontdict={'size':12,'fontweight':'bold'})
 
-                @render.text
-                def notes2():
-                    return "By definition acceleration is change in velocity with respect to time.  As an object moves along a circular path at constant speed its direction changes constantly.  This means that velocity is constantly changing in direction, resulting in acceleration."
+                ax.set_xlim(-plot_width,plot_width)
+                ax.set_ylim(-plot_height,plot_height)
+                ax.set_aspect('equal')
+                
+                ax.axis('off')
 
-                @render.text
-                def notes3():
-                    return "By drawing the velocity vectors v at a point on the circular path and again after time t, it can easily be shown that the  acceleration points toward the centre of the circular path."
+                return fig
 
-                @render.text
-                def notes4():
-                    return "At any point on the path of a circular motion, the acceleration point toward the centre, hence the term, centripetal."
+        with ui.card():
+            @render.text
+            def notes1():
+                return "Centripetal force is not a fundamental force.  It is an apparent force as a result of an object in motion following a circular path."
 
-                @render.text
-                def notes5():
-                    return "To understand why centripetal force exist we must consider Newton’s law of inertia.  If no net force is present, an object moving at velocity v tangential to the circular path will continue its path in a straight line at constant speed.  In this case, there would be no circular motion."
+            @render.text
+            def notes2():
+                return "By definition acceleration is change in velocity with respect to time.  As an object moves along a circular path at constant speed its direction changes constantly.  This means that velocity is constantly changing in direction, resulting in acceleration."
 
-                @render.text
-                def notes6():
-                    return "In order to deviate from the straight line there must be a net force acting on the object.  This force pulls the object toward the centre to maintain the circular motion."
+            @render.text
+            def notes3():
+                return "By drawing the velocity vectors v at a point on the circular path and again after time t, it can easily be shown that the  acceleration points toward the centre of the circular path."
+
+            @render.text
+            def notes4():
+                return "At any point on the path of a circular motion, the acceleration point toward the centre, hence the term, centripetal."
+
+            @render.text
+            def notes5():
+                return "To understand why centripetal force exist we must consider Newton’s law of inertia.  If no net force is present, an object moving at velocity v tangential to the circular path will continue its path in a straight line at constant speed.  In this case, there would be no circular motion."
+
+            @render.text
+            def notes6():
+                return "In order to deviate from the straight line there must be a net force acting on the object.  This force pulls the object toward the centre to maintain the circular motion."
 
 with ui.nav_panel('Banked corners'):
 
@@ -158,7 +156,6 @@ with ui.nav_panel('Banked corners'):
             mu: float = 0.5
             slope_x: np.array([float,float]) = np.array([0,100])
             edge_color = 'black'
-            #face_color = 'lightgrey'
             box_color = 'lightgrey'
             box_height = 36
             box_width = 15
@@ -200,9 +197,11 @@ with ui.nav_panel('Banked corners'):
             ax.arrow(rect_bottom_centre_x, rect_bottom_centre_y, dx=-dy_std*np.sin(rad(angle))*np.cos(rad(angle)), dy=dy_std*np.cos(rad(angle))*np.cos(rad(angle)), shape='full', lw=2, head_width=plot_width/50, color='grey')
             ax.text(rect_bottom_centre_x - dy_std*np.sin(rad(angle)) - 8, rect_bottom_centre_y + dy_std*np.cos(rad(angle)) + 8, 'Normal', fontdict={'size':12})
 
+            # friction
             ax.arrow(rect_bottom_centre_x, rect_bottom_centre_y, dx=-mu*dy_std * np.cos(rad(angle))*np.cos(rad(angle)), dy=-mu*dy_std * np.sin(rad(angle))*np.cos(rad(angle)), shape='full', lw=2, head_width=plot_width/50, color='grey')
             ax.text(rect_bottom_centre_x - mu*dy_std * np.cos(rad(angle)) - 10, rect_bottom_centre_y - mu*dy_std * np.sin(rad(angle)) - 10, 'friction', ha='left', fontdict={'size':12})        
 
+            # horizontal ocmponents
             if angle > 0:
                 ax.arrow(rect_bottom_centre_x, rect_bottom_centre_y, dx=-dy_std*np.sin(rad(angle)), dy=0, shape='full', lw=2, head_width=plot_width/50, color='blue')
                 ax.arrow(rect_bottom_centre_x, rect_bottom_centre_y, dx=-mu*dy_std * np.cos(rad(angle)), dy=0, shape='full', lw=2, head_width=plot_width/50, color='red')
@@ -211,7 +210,7 @@ with ui.nav_panel('Banked corners'):
             ax.set_xlim(0,plot_width)
             ax.set_ylim(-40,plot_height)
             ax.set_aspect('equal')
-            #ax.axis('off')
+            ax.axis('off')
 
             return fig
 
@@ -229,7 +228,7 @@ with ui.nav_panel('Banked corners'):
                 return "Lets move the slider to increase angle to 10 degrees.  Now centripetal force as a result of friction has a lesser effect, but the horizontal component of the normal force comes into play."
 
             @render.text
-            def notesC():
+            def notesD():
                 return "In general, direct contribution to centripetal force is much greater by the normal force is much greater than friction.  Now centripetal force is the sum of the horizontal components of friction AND the normal force, which is greater than when the road is not banked.  Since centripetal force is proportional to the speed on a circular path, a vehicle can travel safely around a banked corner at higher speed without going off the road!"
 
 ui.nav_spacer()
